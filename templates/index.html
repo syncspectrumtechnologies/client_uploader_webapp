@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Client Bulk Import</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="container">
+    <section class="card hero">
+      <h1>Client Bulk Import</h1>
+      <p>Upload a CSV or Excel file and import client records directly into PostgreSQL.</p>
+    </section>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <section class="card">
+      <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data" class="form-grid">
+        <div class="field full">
+          <label for="file">Upload file</label>
+          <input id="file" name="file" type="file" accept=".csv,.xlsx,.xls" required>
+        </div>
+
+        <div class="field full">
+          <label for="database_url">Database URL</label>
+          <input id="database_url" name="database_url" type="text" value="{{ defaults.database_url }}" placeholder="postgresql://user:pass@host:port/dbname">
+          <small>Leave blank only for dry runs if DATABASE_URL is already set on the server.</small>
+        </div>
+
+        <div class="field">
+          <label for="company_id">Company ID</label>
+          <input id="company_id" name="company_id" type="text" value="{{ defaults.company_id }}" required>
+        </div>
+
+        <div class="field">
+          <label for="sheet_name">Excel sheet name</label>
+          <input id="sheet_name" name="sheet_name" type="text" value="{{ defaults.sheet_name }}" placeholder="Optional">
+        </div>
+
+        <div class="field">
+          <label for="delimiter">CSV delimiter</label>
+          <input id="delimiter" name="delimiter" type="text" value="{{ defaults.delimiter or ',' }}" maxlength="3">
+        </div>
+
+        <div class="field">
+          <label for="on_conflict">On conflict</label>
+          <select id="on_conflict" name="on_conflict">
+            <option value="update" {% if defaults.on_conflict == 'update' %}selected{% endif %}>Update existing client</option>
+            <option value="skip" {% if defaults.on_conflict == 'skip' %}selected{% endif %}>Skip existing client</option>
+          </select>
+        </div>
+
+        <label class="checkbox">
+          <input type="checkbox" name="dry_run" {% if defaults.dry_run %}checked{% endif %}>
+          <span>Dry run only</span>
+        </label>
+
+        <label class="checkbox">
+          <input type="checkbox" name="strict" {% if defaults.strict %}checked{% endif %}>
+          <span>Warn on duplicate company names in file</span>
+        </label>
+
+        <div class="actions full">
+          <button type="submit">Upload and Import</button>
+        </div>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

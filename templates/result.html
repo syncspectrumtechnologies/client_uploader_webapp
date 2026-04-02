@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Import Result</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="container">
+    <section class="card hero">
+      <h1>Import Result</h1>
+      <p>File processed: <strong>{{ filename }}</strong></p>
+      <div class="toolbar">
+        <a class="button secondary" href="{{ url_for('index') }}">Import another file</a>
+        <a class="button" href="{{ url_for('download_report', report_name=report_name) }}">Download report CSV</a>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <div class="stat card"><span>Mode</span><strong>{{ 'Dry run' if result.dry_run else 'Live import' }}</strong></div>
+      <div class="stat card"><span>Parsed rows</span><strong>{{ result.parsed_valid_rows }}</strong></div>
+      <div class="stat card"><span>Inserted</span><strong>{{ result.summary.inserted }}</strong></div>
+      <div class="stat card"><span>Updated</span><strong>{{ result.summary.updated }}</strong></div>
+      <div class="stat card"><span>Skipped</span><strong>{{ result.summary.skipped }}</strong></div>
+      <div class="stat card"><span>Errors</span><strong>{{ result.summary.errors }}</strong></div>
+    </section>
+
+    <section class="card">
+      <h2>Detected column mapping</h2>
+      <table>
+        <thead><tr><th>Client field</th><th>Uploaded column</th></tr></thead>
+        <tbody>
+          {% for key, value in result.detected_column_mapping.items() %}
+            <tr><td>{{ key }}</td><td>{{ value }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Preview</h2>
+      {% if result.preview %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {% for key in result.preview[0].keys() %}
+                <th>{{ key }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in result.preview %}
+              <tr>
+                {% for value in row.values() %}
+                  <td>{{ value or '' }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>No valid rows found in the uploaded file.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <h2>Row results</h2>
+      {% if result.results %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Row</th>
+              <th>Action</th>
+              <th>Company</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in result.results %}
+              <tr>
+                <td>{{ row.source_row }}</td>
+                <td><span class="badge {{ row.action }}">{{ row.action }}</span></td>
+                <td>{{ row.company_name or '' }}</td>
+                <td>{{ row.message }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p>No warnings or result rows were generated.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>
