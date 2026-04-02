@@ -46,4 +46,20 @@ export FLASK_SECRET_KEY='change-me'
 ## Important
 - Uploads and reports are now written to a runtime folder outside the project directory by default, so Flask will not restart during uploads.
 - The app starts with the auto-reloader disabled.
-# client_uploader_webapp
+
+
+## Render deployment
+
+Render requires your web service to listen on host `0.0.0.0` and the port from the `PORT` environment variable. This project is configured for that now.
+
+If you deploy on Render, use either:
+
+- `render.yaml` in this project, or
+- Build command: `pip install -r requirements.txt`
+- Start command: `gunicorn wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120`
+
+Local run still works with:
+
+```bash
+python3 app.py
+```
